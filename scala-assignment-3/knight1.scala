@@ -26,7 +26,14 @@ def is_legal(dim: Int, path: Path, x: Pos) : Boolean = {
 
 
 def legal_moves(dim: Int, path: Path, x: Pos) : List[Pos] = {
-  List((1,2),(2,1),(2,-1),(1,-2),(-1,-2),(-2,-1),(-2,1),(-1,2)).map(o => (o._1+x._1,o._2+x._2)).filter(p => is_legal(dim, path, p))
+  List((x._1 + 1, x._2 + 2),
+       (x._1 + 2, x._2 + 1), 
+       (x._1 + 2, x._2 - 1), 
+       (x._1 + 1, x._2 - 2), 
+       (x._1 - 1, x._2 - 2), 
+       (x._1 - 2, x._2 - 1), 
+       (x._1 - 2, x._2 + 1), 
+       (x._1 - 1, x._2 + 2)).filter(x => is_legal(dim, path,x))
 }
 
 
@@ -46,13 +53,15 @@ def legal_moves(dim: Int, path: Path, x: Pos) : List[Pos] = {
 //    and the second collects all tours in a list of paths.
 
 def count_tours(dim: Int, path: Path) : Int = {
-  if(path.length >= dim*dim) 1
-  else legal_moves(dim, path, path.head).map(move => count_tours(dim, move :: path)).sum
+  if (path.size == dim*dim && legal_moves(dim,path,path.head).contains(path.last)) 0
+  else if (path.size == dim*dim && !legal_moves(dim,path,path.head).contains(path.last)) 1
+  else ( for (x <- legal_moves(dim,path,path.head) ) yield count_tours(dim, x::path)).sum
 }
 
 def enum_tours(dim: Int, path: Path) : List[Path] = {
-  if(path.length >= dim*dim) List(path)
-  else legal_moves(dim, path, path.head).flatMap(move => enum_tours(dim, move :: path))
+  if (path.size == dim*dim && legal_moves(dim,path,path.head).contains(path.last)) Nil
+  else if (path.size == dim*dim && !legal_moves(dim,path,path.head).contains(path.last)) List(path)
+  else ( for (x <- legal_moves(dim,path,path.head) ) yield enum_tours(dim, x::path)).flatten
 }
 
 
